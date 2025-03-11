@@ -1,12 +1,11 @@
 {% extends 'base.html' %}
 
 
-{% block title %}
-Home
-{% endblock %}
+{% block title %} Home {% endblock %}
 
 
 {% block content %}
+
     <h2 class="text-primary mb-4">Users</h2>
     <div class="table-responsive mb-5">
         <table class="table table-striped table-hover table-bordered">
@@ -20,15 +19,21 @@ Home
                 </tr>
             </thead>
             <tbody>
-                {% for user in users %}
-                <tr>
-                    <td>{{ user.id }}</td>
-                    <td>{{ user.username }}</td>
-                    <td>{{ user.email }}</td>
-                    <td>{{ user.password }}</td>
-                    <td>{{ user.created_at }}</td>
-                </tr>
-                {% endfor %}
+                {% if users %}
+                    {% for user in users %}
+                    <tr>
+                        <td>{{ user.id }}</td>
+                        <td>{{ user.username }}</td>
+                        <td>{{ user.email }}</td>
+                        <td>{{ user.password }}</td>
+                        <td>{{ user.created_at }}</td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center">No users found</td>
+                    </tr>
+                {% endif %}
             </tbody>
         </table>
     </div>
@@ -44,13 +49,19 @@ Home
                 </tr>
             </thead>
             <tbody>
-                {% for role in roles %}
-                <tr>
-                    <td>{{ role.id }}</td>
-                    <td>{{ role.name }}</td>
-                    <td>{{ role.description }}</td>
-                </tr>
-                {% endfor %}
+                {% if roles %}
+                    {% for role in roles %}
+                    <tr>
+                        <td>{{ role.id }}</td>
+                        <td>{{ role.name }}</td>
+                        <td>{{ role.description }}</td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="3" class="text-center">No roles found</td>
+                    </tr>
+                {% endif %}
             </tbody>
         </table>
     </div>
@@ -62,20 +73,121 @@ Home
                 <tr>
                     <th>id</th>
                     <th>name</th>
-                    <th>description</th>
+                    <th>endpoint</th>
                     <th>access</th>
                 </tr>
             </thead>
             <tbody>
-                {% for permission in permissions %}
-                <tr>
-                    <td>{{ permission.id }}</td>
-                    <td>{{ permission.method }}</td>
-                    <td>{{ permission.endpoint }}</td>
-                    <td>{{ permission.access }}</td>
-                </tr>
-                {% endfor %}
+                {% if permissions %}
+                    {% for permission in permissions %}
+                    <tr>
+                        <td>{{ permission.id }}</td>
+                        <td>{{ permission.method }}</td>
+                        <td>{{ permission.endpoint }}</td>
+                        <td>{{ permission.access }}</td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="4" class="text-center">No permissions found</td>
+                    </tr>
+                {% endif %}
             </tbody>
         </table>
     </div>
+
+    <h2 class="text-warning mb-4">User Roles</h2>
+    <div class="table-responsive mb-5">
+        <table class="table table-striped table-hover table-bordered">
+            <thead class="table-warning">
+                <tr>
+                    <th>User ID</th>
+                    <th>Username</th>
+                    <th>Role ID</th>
+                    <th>Role Name</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if user_roles %}
+                    {% for user_role in user_roles %}
+                    <tr>
+                        <td>{{ user_role.user.id }}</td>
+                        <td>{{ user_role.user.username }}</td>
+                        <td>{{ user_role.role.id }}</td>
+                        <td>{{ user_role.role.name }}</td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="4" class="text-center">No user roles found</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+    <h2 class="text-danger mb-4">Role Permissions</h2>
+    <div class="table-responsive mb-5">
+        <table class="table table-striped table-hover table-bordered">
+            <thead class="table-danger">
+                <tr>
+                    <th>Role ID</th>
+                    <th>Role Name</th>
+                    <th>Role Description</th>
+                    <th>Permission ID</th>
+                    <th>Permission Method</th>
+                    <th>Permission Endpoint</th>
+                    <th>Permission Access</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if roles_permissions %}
+                    {% for role_permission in roles_permissions %}
+                    <tr>
+                        <td>{{ role_permission.role.id }}</td>
+                        <td>{{ role_permission.role.name }}</td>
+                        <td>{{ role_permission.role.description }}</td>
+                        <td>{{ role_permission.permission.id }}</td>
+                        <td>{{ role_permission.permission.method }}</td>
+                        <td>{{ role_permission.permission.endpoint }}</td>
+                        <td>{{ role_permission.permission.access }}</td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center">No role permissions found</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+    <h2 class="text-secondary mb-4">Group</h2>
+    <div class="table-responsive mb-5">
+        <table class="table table-striped table-hover table-bordered">
+            <thead class="table-secondary">
+                <tr>
+                    <th>id</th>
+                    <th>name</th>
+                    <th>description</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if groups %}
+                    {% for group in groups %}
+                    <tr>
+                        <td>{{ group.id }}</td>
+                        <td>{{ group.name }}</td>
+                        <td>{{ group.description }}</td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="3" class="text-center">No groups found</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
 {% endblock %}

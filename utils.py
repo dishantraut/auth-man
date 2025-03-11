@@ -1,10 +1,15 @@
+"""
+utils.py - Utility functions for the application
+"""
+
 from faker import Faker
-from models import User, Role, Permission
+
+from models import *
 from database import get_db
 
-# Import your other models here
 
 fake = Faker()
+
 
 def load_fake_data(num_records=10):
     """
@@ -16,15 +21,18 @@ def load_fake_data(num_records=10):
 
     # * Truncate tables first
     db = next(get_db())
+    # db.query(UserGroup).delete()
+    # db.query(GroupPermission).delete()
     # db.query(UserRole).delete()
     # db.query(RolePermission).delete()
     db.query(User).delete()
     db.query(Role).delete()
+    db.query(Group).delete()
     db.query(Permission).delete()
     db.commit()
     db.close()
 
-    # * Create fake users
+    # * Create Users
     for _ in range(5):
         user = User(
             username=fake.user_name(),
@@ -36,7 +44,7 @@ def load_fake_data(num_records=10):
         db.commit()
         db.close()
 
-    # * Create fake roles
+    # * Create Roles
     roles = [
         Role(name="LocationAdmin", description="Location Supervisor"),
         Role(name="RegionAdmin", description="Region Manager"),
@@ -46,7 +54,7 @@ def load_fake_data(num_records=10):
     db.commit()
     db.close()
 
-    # * Create fake permissions
+    # * Create Permissions
     methods = ('GET', 'POST', 'PUT', 'PATCH', 'DELETE')
     endpoints = ('/billing', '/iam', '/devices', '/config')
     for endpoint in endpoints:
@@ -61,27 +69,45 @@ def load_fake_data(num_records=10):
             db.commit()
             db.close()
 
-    # # Add fake user-role assignments
-    # for _ in range(num_records):
-    #     user_role = UserRole(
-    #         user_id=fake.random_int(min=1, max=num_records),
-    #         role_id=fake.random_int(min=1, max=num_records)
-    #     )
-    #     db = next(get_db())
-    #     db.add(user_role)
-    #     db.commit()
-    #     db.close()
+    # * Create UserRoles
+    db = next(get_db())
+    users = db.query(User).all()
+    roles = db.query(Role).all()
+    user_role1 = UserRoles(user_id=users[0].id, role_id=roles[0].id)
+    user_role2 = UserRoles(user_id=users[0].id, role_id=roles[1].id)
+    user_role3 = UserRoles(user_id=users[1].id, role_id=roles[0].id)
 
-    # # Add fake role-permission assignments
-    # for _ in range(num_records):
-    #     role_permission = RolePermission(
-    #         role_id=fake.random_int(min=1, max=num_records),
-    #         permission_id=fake.random_int(min=1, max=num_records)
-    #     )
-    #     db = next(get_db())
-    #     db.add(role_permission)
-    #     db.commit()
-    #     db.close()
+    db.add_all([user_role1, user_role2, user_role3])
+    db.commit()
+    db.close()
+
+    # * Create RolePermissions
+    db = next(get_db())
+    roles = db.query(Role).all()
+    permissions = db.query(Permission).all()
+
+    for role in roles:
+        for permission in permissions:
+            role_permission = RolePermissions(
+                role_id=role.id,
+                permission_id=permission.id
+            )
+            db.add(role_permission)
+
+    db.commit()
+    db.close()
+
+
+    # * Create Groups
+    groups = [
+        Group(name="Accounting", description="Accounting Department"),
+        Group(name="IT", description="IT Department"),
+        Group(name="HR", description="Human Resources")
+    ]
+    db = next(get_db())
+    db.bulk_save_objects(groups)
+    db.commit()
+    db.close()
 
     print(f"Created {num_records} fake records for each model")
 

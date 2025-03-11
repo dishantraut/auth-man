@@ -13,3 +13,9 @@ install:
 
 clean-venv:
 	rm -rf $(VENV)
+
+# start:
+# 	docker start $(docker ps -aq --filter name=authman)
+
+# stop:
+# 	docker stop $(docker ps -aq --filter name=authman)
