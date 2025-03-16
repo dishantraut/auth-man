@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 
 from database import get_db
-from models import Role
+from models import Role, UserRoles
 
 roles_bp = Blueprint('roles', __name__, url_prefix='/iam/roles')
 

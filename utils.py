@@ -24,12 +24,12 @@ def load_fake_data(num_records=10):
     db = next(get_db())
     # db.query(UserGroup).delete()
     # db.query(GroupPermission).delete()
-    # db.query(RolePermission).delete()
     db.query(User).delete()
     db.query(Role).delete()
     db.query(Group).delete()
     db.query(Permission).delete()
     db.query(UserRoles).delete()
+    db.query(RolePermissions).delete()
     db.commit()
     db.close()
 
@@ -69,48 +69,47 @@ def load_fake_data(num_records=10):
             db.commit()
             db.close()
 
-    # # TODO : delete single role & drop all references
-    # # * Create UserRoles
-    # db = next(get_db())
-    # users = db.query(User).all()
-    # roles = db.query(Role).all()
-    # user_role1 = UserRoles(user_id=users[0].id, role_id=roles[0].id)
-    # user_role2 = UserRoles(user_id=users[0].id, role_id=roles[1].id)
-    # user_role3 = UserRoles(user_id=users[1].id, role_id=roles[0].id)
+    # * Create UserRoles
+    db = next(get_db())
+    users = db.query(User).all()
+    roles = db.query(Role).all()
+    user_role1 = UserRoles(user_id=users[0].id, role_id=roles[0].id)
+    user_role2 = UserRoles(user_id=users[0].id, role_id=roles[1].id)
+    user_role3 = UserRoles(user_id=users[1].id, role_id=roles[0].id)
 
-    # db.add_all([user_role1, user_role2, user_role3])
-    # db.commit()
-    # db.close()
+    db.add_all([user_role1, user_role2, user_role3])
+    db.commit()
+    db.close()
 
-    # # * Create RolePermissions
-    # db = next(get_db())
-    # roles = db.query(Role).all()
-    # permissions = db.query(Permission).all()
+    # * Create RolePermissions
+    db = next(get_db())
+    roles = db.query(Role).all()
+    permissions = db.query(Permission).all()
 
-    # for role in roles:
-    #     for permission in permissions:
-    #         role_permission = RolePermissions(
-    #             role_id=role.id,
-    #             permission_id=permission.id,
-    #             access=fake.boolean()
-    #         )
-    #         # print(f"Role ID: {role.id}, Permission ID: {permission.id}, Access: {role_permission.access}")
-    #         db.add(role_permission)
+    for role in roles:
+        for permission in permissions:
+            role_permission = RolePermissions(
+                role_id=role.id,
+                permission_id=permission.id,
+                access=fake.boolean()
+            )
+            # print(f"Role ID: {role.id}, Permission ID: {permission.id}, Access: {role_permission.access}")
+            db.add(role_permission)
 
-    # db.commit()
-    # db.close()
+    db.commit()
+    db.close()
 
 
-    # # * Create Groups
-    # groups = [
-    #     Group(name="Accounting", description="Accounting Department"),
-    #     Group(name="IT", description="IT Department"),
-    #     Group(name="HR", description="Human Resources")
-    # ]
-    # db = next(get_db())
-    # db.bulk_save_objects(groups)
-    # db.commit()
-    # db.close()
+    # * Create Groups
+    groups = [
+        Group(name="Accounting", description="Accounting Department"),
+        Group(name="IT", description="IT Department"),
+        Group(name="HR", description="Human Resources")
+    ]
+    db = next(get_db())
+    db.bulk_save_objects(groups)
+    db.commit()
+    db.close()
 
     print(f"Created {num_records} fake records for each model")
 

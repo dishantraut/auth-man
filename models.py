@@ -13,6 +13,7 @@ class User(Base):
     email = Column(String(100), unique=True, nullable=False)
     password = Column(String(255), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+    roles = relationship("Role", secondary="user_roles", back_populates="users")
 
     def to_dict(self):
         return {
@@ -29,6 +30,8 @@ class Role(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String(50), unique=True, nullable=False)
     description = Column(String(200))
+    users = relationship("User", secondary="user_roles", back_populates="roles")
+    permissions = relationship("Permission", secondary="role_permissions", back_populates="roles")
 
     def to_dict(self):
         return {
@@ -44,6 +47,7 @@ class Permission(Base):
     id = Column(Integer, primary_key=True)
     method = Column(String)
     endpoint = Column(String)
+    roles = relationship("Role", secondary="role_permissions", back_populates="permissions")
 
     def to_dict(self):
         return {
@@ -52,30 +56,20 @@ class Permission(Base):
             'endpoint': self.endpoint
         }
 
-# TODO : delete single role & drop all references
-# class UserRoles(Base):
-#     __tablename__ = 'user_roles'
 
-#     user_id = Column(Integer, ForeignKey('users.id', ondelete='CASCADE'), primary_key=True)
-#     role_id = Column(Integer, ForeignKey('roles.id', ondelete='CASCADE'), primary_key=True)
+class RolePermissions(Base):
+    __tablename__ = 'role_permissions'
 
-#     user = relationship("User", backref="user_roles", cascade="all, delete-orphan")
-#     role = relationship("Role", backref="user_roles", cascade="all, delete-orphan")
+    role_id = Column(Integer, ForeignKey('roles.id', ondelete='CASCADE'), primary_key=True)
+    permission_id = Column(Integer, ForeignKey('permissions.id', ondelete='CASCADE'), primary_key=True)
+    access = Column(Boolean, default=False)
 
 
+class UserRoles(Base):
+    __tablename__ = 'user_roles'
 
-# class RolePermissions(Base):
-#     __tablename__ = 'role_permissions'
-
-#     role_id = Column(Integer, ForeignKey(
-#         'roles.id', ondelete='CASCADE'), primary_key=True)
-#     permission_id = Column(Integer, ForeignKey(
-#         'permissions.id', ondelete='CASCADE'), primary_key=True)
-#     access = Column(Boolean, default=False)
-
-#     role = relationship("Role", backref="role_permissions", cascade="all")
-#     permission = relationship(
-#         "Permission", backref="role_permissions", cascade="all")
+    user_id = Column(Integer, ForeignKey('users.id', ondelete='CASCADE'), primary_key=True)
+    role_id = Column(Integer, ForeignKey('roles.id', ondelete='CASCADE'), primary_key=True)
 
 
 class Group(Base):

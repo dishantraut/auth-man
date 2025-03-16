@@ -27,7 +27,6 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SQLALCHEMY_DATABASE_URI"] = config["database"]["uri"]
 
 
-
 # * Register blueprints
 app.register_blueprint(per_bp)
 app.register_blueprint(auth_bp)
@@ -38,57 +37,49 @@ app.register_blueprint(roles_bp)
 @app.route("/")
 def hello():
 
-    db = next(get_db())
-    users = db.query(User).all()
-    roles = db.query(Role).all()
-    permissions = db.query(Permission).all()
-    # user_roles = db.query(UserRoles).all()
+    with next(get_db()) as db:
+        users = db.query(User).all()
+        roles = db.query(Role).all()
+        permissions = db.query(Permission).all()
+        groups = db.query(Group).all()
 
-    user_roles = (
-        db.query(UserRoles)
-        .options(joinedload(UserRoles.user), joinedload(UserRoles.role))
-        .all()
-    )
+        user_roles = (
+            db.query(UserRoles, User, Role)
+            .join(User, UserRoles.user_id == User.id)
+            .join(Role, UserRoles.role_id == Role.id)
+            .all()
+        )
 
-    # roles_permissions = (
-    #     db.query(RolePermissions)
-    #     .options(joinedload(RolePermissions.role), joinedload(RolePermissions.permission))
-    #     .all()
-    # )
-    # groups = db.query(Group).all()
+        # ! Uncomment For Debugging
+        # print("\nUser Roles:")
+        # print("User ID\tUsername\tRole ID\tRole Name")
+        # print("-" * 50)
+        # for user_role, user, role in user_roles:
+        #     print(f"{user.id}\t{user.username}\t{role.id}\t{role.name}")
 
-    # print("\nUser Roles:", [(ur.user_id, ur.role_id) for ur in user_roles])
-    # print("\nRole Permissions:", [(rp.role_id, rp.permission_id) for rp in roles_permissions])
-    db.close()
+        roles_permissions = (
+            db.query(RolePermissions, Role, Permission)
+            .join(Role, RolePermissions.role_id == Role.id)
+            .join(Permission, RolePermissions.permission_id == Permission.id)
+            .all()
+        )
+
+        # ! Uncomment For Debugging
+        # print("\nRoles Permissions:")
+        # print("Role ID\tRole Name\tRole Description\tPermission ID\tMethod\tEndpoint\tAccess")
+        # print("-" * 100)
+        # for role_perm, role, permission in roles_permissions:
+        #     print(f"{role.id}\t{role.name}\t{role.description}\t{permission.id}\t{permission.method}\t{permission.endpoint}\t{role_perm.access}")
 
     return render_template(
         "home.html",
         users=users,
         roles=roles,
-        groups=None,
+        groups=groups,
         permissions=permissions,
         user_roles=user_roles,
-        roles_permissions=None
+        roles_permissions=roles_permissions
     )
-
-
-
-
-
-
-
-
-# @app.route('/groups', methods=['GET', 'POST'])
-# def groups():
-#     db = next(get_db())
-#     if request.method == 'POST':
-#         data = request.json
-#         group = Group(name=data['name'], description=data.get('description'))
-#         db.add(group)
-#         db.commit()
-#         return jsonify({'message': 'Group created successfully'})
-#     groups = db.query(Group).all()
-#     return jsonify([{'id': g.id, 'name': g.name, 'description': g.description} for g in groups])
 
 
 if __name__ == "__main__":
@@ -100,4 +91,3 @@ if __name__ == "__main__":
         use_reloader=True,
         use_debugger=True
     )
-

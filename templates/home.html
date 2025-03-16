@@ -107,12 +107,12 @@
             </thead>
             <tbody>
                 {% if user_roles %}
-                    {% for user_role in user_roles %}
+                    {% for user_role, user, role in user_roles %}
                     <tr>
-                        <td>{{ user_role.user.id }}</td>
-                        <td>{{ user_role.user.username }}</td>
-                        <td>{{ user_role.role.id }}</td>
-                        <td>{{ user_role.role.name }}</td>
+                        <td>{{ user.id }}</td>
+                        <td>{{ user.username }}</td>
+                        <td>{{ role.id }}</td>
+                        <td>{{ role.name }}</td>
                     </tr>
                     {% endfor %}
                 {% else %}
@@ -140,15 +140,15 @@
             </thead>
             <tbody>
                 {% if roles_permissions %}
-                    {% for role_permission in roles_permissions %}
+                    {% for role_perm, role, permission in roles_permissions %}
                     <tr>
-                        <td>{{ role_permission.role.id }}</td>
-                        <td>{{ role_permission.role.name }}</td>
-                        <td>{{ role_permission.role.description }}</td>
-                        <td>{{ role_permission.permission.id }}</td>
-                        <td>{{ role_permission.permission.method }}</td>
-                        <td>{{ role_permission.permission.endpoint }}</td>
-                        <td>{{ role_permission.access }}</td>
+                        <td>{{ role.id }}</td>
+                        <td>{{ role.name }}</td>
+                        <td>{{ role.description }}</td>
+                        <td>{{ permission.id }}</td>
+                        <td>{{ permission.method }}</td>
+                        <td>{{ permission.endpoint }}</td>
+                        <td>{{ role_perm.access }}</td>
                     </tr>
                     {% endfor %}
                 {% else %}
