@@ -74,7 +74,6 @@
                     <th>id</th>
                     <th>name</th>
                     <th>endpoint</th>
-                    <th>access</th>
                 </tr>
             </thead>
             <tbody>
@@ -84,7 +83,6 @@
                         <td>{{ permission.id }}</td>
                         <td>{{ permission.method }}</td>
                         <td>{{ permission.endpoint }}</td>
-                        <td>{{ permission.access }}</td>
                     </tr>
                     {% endfor %}
                 {% else %}
@@ -150,7 +148,7 @@
                         <td>{{ role_permission.permission.id }}</td>
                         <td>{{ role_permission.permission.method }}</td>
                         <td>{{ role_permission.permission.endpoint }}</td>
-                        <td>{{ role_permission.permission.access }}</td>
+                        <td>{{ role_permission.access }}</td>
                     </tr>
                     {% endfor %}
                 {% else %}

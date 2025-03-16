@@ -5,22 +5,34 @@ Application entry point
 import toml
 from flask import Flask, render_template, request, jsonify
 from sqlalchemy.orm import joinedload
-from werkzeug.security import generate_password_hash
+from werkzeug.security import generate_password_hash, check_password_hash
 
 from models import *
 from database import get_db
+from routes.auth import auth_bp
+from routes.users import users_bp
+from routes.permissions import per_bp
+from routes.roles import roles_bp
 
 
 config = toml.load("config.toml")
 
 
 app = Flask(__name__)
-# App configuration
+# * App configuration
 app.config["DEBUG"] = config["app"]["debug"]
 app.config["SECRET_KEY"] = config["app"]["secret_key"]
-# Database configuration
+# * Database configuration
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SQLALCHEMY_DATABASE_URI"] = config["database"]["uri"]
+
+
+
+# * Register blueprints
+app.register_blueprint(per_bp)
+app.register_blueprint(auth_bp)
+app.register_blueprint(users_bp)
+app.register_blueprint(roles_bp)
 
 
 @app.route("/")
@@ -30,21 +42,21 @@ def hello():
     users = db.query(User).all()
     roles = db.query(Role).all()
     permissions = db.query(Permission).all()
+    # user_roles = db.query(UserRoles).all()
+
     user_roles = (
         db.query(UserRoles)
         .options(joinedload(UserRoles.user), joinedload(UserRoles.role))
         .all()
     )
-    roles_permissions = (
-        db.query(RolePermissions)
-        .options(joinedload(RolePermissions.role), joinedload(RolePermissions.permission))
-        .all()
-    )
-    groups = db.query(Group).all()
-    # * uncomment for debugging
-    # print("\nUsers:", [u.id for u in users])
-    # print("\nRoles:", [r.id for r in roles])
-    # print("\nPermissions:", [p.id for p in permissions])
+
+    # roles_permissions = (
+    #     db.query(RolePermissions)
+    #     .options(joinedload(RolePermissions.role), joinedload(RolePermissions.permission))
+    #     .all()
+    # )
+    # groups = db.query(Group).all()
+
     # print("\nUser Roles:", [(ur.user_id, ur.role_id) for ur in user_roles])
     # print("\nRole Permissions:", [(rp.role_id, rp.permission_id) for rp in roles_permissions])
     db.close()
@@ -53,83 +65,17 @@ def hello():
         "home.html",
         users=users,
         roles=roles,
-        groups=groups,
+        groups=None,
         permissions=permissions,
         user_roles=user_roles,
-        roles_permissions=roles_permissions
+        roles_permissions=None
     )
 
 
-# # User CRUD operations
-# @app.route('/users', methods=['GET', 'POST'])
-# def users():
-#     db = next(get_db())
-#     if request.method == 'POST':
-#         data = request.json
-#         user = User(
-#             username=data['username'],
-#             email=data['email'],
-#             password=generate_password_hash(data['password'])
-#         )
-#         db.add(user)
-#         db.commit()
-#         return jsonify({'message': 'User created successfully'})
-#     users = db.query(User).all()
-#     return jsonify([{'id': u.id, 'username': u.username, 'email': u.email} for u in users])
 
 
-# @app.route('/users/<int:id>', methods=['GET', 'PUT', 'DELETE'])
-# def user(id):
-#     db = next(get_db())
-#     user = db.query(User).get_or_404(id)
-#     if request.method == 'DELETE':
-#         db.delete(user)
-#         db.commit()
-#         return jsonify({'message': 'User deleted successfully'})
-#     elif request.method == 'PUT':
-#         data = request.json
-#         user.username = data.get('username', user.username)
-#         user.email = data.get('email', user.email)
-#         if 'password' in data:
-#             user.password = generate_password_hash(data['password'])
-#         db.commit()
-#         return jsonify({'message': 'User updated successfully'})
-#     return jsonify({'id': user.id, 'username': user.username, 'email': user.email})
 
 
-# @app.route('/roles', methods=['GET', 'POST'])
-# def roles():
-#     db = next(get_db())
-#     if request.method == 'POST':
-#         data = request.json
-#         role = Role(name=data['name'], description=data.get('description'))
-#         db.add(role)
-#         db.commit()
-#         return jsonify({'message': 'Role created successfully'})
-#     roles = db.query(Role).all()
-#     return jsonify([{'id': r.id, 'name': r.name, 'description': r.description} for r in roles])
-
-
-# @app.route('/permissions', methods=['GET', 'POST'])
-# def permissions():
-#     db = next(get_db())
-#     if request.method == 'POST':
-#         data = request.json
-#         permission = Permission(
-#             method=data['method'],
-#             endpoint=data['endpoint'],
-#             access=data.get('access', False)
-#         )
-#         db.add(permission)
-#         db.commit()
-#         return jsonify({'message': 'Permission created successfully'})
-#     permissions = db.query(Permission).all()
-#     return jsonify([{
-#         'id': p.id,
-#         'method': p.method,
-#         'endpoint': p.endpoint,
-#         'access': p.access
-#     } for p in permissions])
 
 
 # @app.route('/groups', methods=['GET', 'POST'])
@@ -154,3 +100,4 @@ if __name__ == "__main__":
         use_reloader=True,
         use_debugger=True
     )
+
