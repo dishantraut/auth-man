@@ -22,8 +22,6 @@ def load_fake_data(num_records=10):
 
     # * Truncate tables first
     db = next(get_db())
-    # db.query(UserGroup).delete()
-    # db.query(GroupPermission).delete()
     db.query(User).delete()
     db.query(Role).delete()
     db.query(Group).delete()
@@ -99,7 +97,6 @@ def load_fake_data(num_records=10):
     db.commit()
     db.close()
 
-
     # * Create Groups
     groups = [
         Group(name="Accounting", description="Accounting Department"),
@@ -112,6 +109,7 @@ def load_fake_data(num_records=10):
     db.close()
 
     print(f"Created {num_records} fake records for each model")
+
 
 if __name__ == "__main__":
     load_fake_data()
