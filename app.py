@@ -3,9 +3,8 @@ Application entry point
 """
 
 import toml
-from flask import Flask, render_template, request, jsonify
-from sqlalchemy.orm import joinedload
-from werkzeug.security import generate_password_hash, check_password_hash
+from flask import Flask, render_template
+
 
 from models import *
 from database import get_db
@@ -13,30 +12,43 @@ from routes.auth import auth_bp
 from routes.users import users_bp
 from routes.permissions import per_bp
 from routes.roles import roles_bp
+from routes.groups import groups_bp
+from routes.user_roles import user_roles_bp
+from routes.role_permissions import role_permissions_bp
 
 
 config = toml.load("config.toml")
 
 
 app = Flask(__name__)
+
 # * App configuration
 app.config["DEBUG"] = config["app"]["debug"]
 app.config["SECRET_KEY"] = config["app"]["secret_key"]
+
 # * Database configuration
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SQLALCHEMY_DATABASE_URI"] = config["database"]["uri"]
-
 
 # * Register blueprints
 app.register_blueprint(per_bp)
 app.register_blueprint(auth_bp)
 app.register_blueprint(users_bp)
 app.register_blueprint(roles_bp)
+app.register_blueprint(groups_bp)
+app.register_blueprint(user_roles_bp)
+app.register_blueprint(role_permissions_bp)
+
 
 
 @app.route("/")
 def hello():
+    """
+    Render the home page with users, roles, permissions, groups and their relationships.
 
+    Returns:
+        str: Rendered HTML template with database query results
+    """
     with next(get_db()) as db:
         users = db.query(User).all()
         roles = db.query(Role).all()

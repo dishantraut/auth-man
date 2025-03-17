@@ -5,19 +5,31 @@ from werkzeug.security import check_password_hash
 from models import User
 from database import get_db
 
-# TODO : add jwt token based access
-# TODO : rate limit login attempts
+# TODO : add jwt token based access >> share the same token into django
+# TODO : rate limit login attempts >> leverage redis container
 # TODO : re-captcha google
+# TODO : document the code via sphinx
+# TODO : add logging
+# TODO : add user registration
+# TODO : add password reset
+# TODO : add email verification
+# TODO : postman api collection & documentation
+# TODO : add tests case for CI/CD run
+# TODO : group related requirement pending
+
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/iam/auth')
 
 
 @auth_bp.route('/login/', methods=['POST'])
 def login():
-    """ Handle user login """
+    """
+    Handle user login by validating credentials
 
-    try:
-        db = next(get_db())
+    Returns:
+        tuple: JSON response with user data and HTTP status code
+    """
+    with next(get_db()) as db:
         data = request.get_json()
 
         if not all(key in data for key in ['username', 'email', 'password']):
@@ -36,12 +48,6 @@ def login():
                 'email': user.email
             }
         }), 200
-
-    except Exception as e:
-        return jsonify({'error': 'Server error'}), 500
-
-    finally:
-        db.close()
 
 
 @auth_bp.route('/logout/', methods=['POST'])
